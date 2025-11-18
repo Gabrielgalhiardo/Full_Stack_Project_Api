@@ -48,4 +48,8 @@ public class Product {
     @JoinColumn(name = "collaborator_id", nullable = false)
     private Collaborator collaborator;
 
+    @ManyToOne
+    @JoinColumn(name = "shopping_cart_id")
+    private ShoopingCart shoppingCart;
+
 }

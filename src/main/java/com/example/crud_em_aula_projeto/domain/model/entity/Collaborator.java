@@ -1,10 +1,7 @@
 package com.example.crud_em_aula_projeto.domain.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -14,11 +11,12 @@ import java.util.List;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "collaborators")
 public class Collaborator extends Usuario {
 
     @OneToMany(mappedBy = "collaborator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Product> products;
+    private List<Product> listOfProducts;
 
 
 }
