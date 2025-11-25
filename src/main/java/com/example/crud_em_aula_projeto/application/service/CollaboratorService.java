@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,13 +57,13 @@ public class CollaboratorService {
                 .collect(Collectors.toList());
     }
 
-    public CollaboratorResponseDTO findById(Long id) {
+    public CollaboratorResponseDTO findById(UUID id) {
         Collaborator collaborator = collaboratorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collaborator not found with id: " + id));
         return new CollaboratorResponseDTO(collaborator.getId(), collaborator.getName(), collaborator.getEmail(), collaborator.getActive());
     }
 
-    public CollaboratorResponseDTO update(Long id, CollaboratorRequestDTO requestDTO) {
+    public CollaboratorResponseDTO update(UUID id, CollaboratorRequestDTO requestDTO) {
         Collaborator collaborator = collaboratorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collaborator not found with id: " + id));
 
@@ -81,14 +82,14 @@ public class CollaboratorService {
         return new CollaboratorResponseDTO(collaborator.getId(), collaborator.getName(), collaborator.getEmail(), collaborator.getActive());
     }
 
-    public void deleteCollaborator(Long id) {
+    public void deleteCollaborator(UUID id) {
         Collaborator collaborator = collaboratorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collaborator not found with id: " + id));
         collaborator.setActive(false);
         collaboratorRepository.save(collaborator);
     }
 
-    public void activate(Long id) {
+    public void activate(UUID id) {
         Collaborator collaborator = collaboratorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collaborator not found with id: " + id));
         collaborator.setActive(true);

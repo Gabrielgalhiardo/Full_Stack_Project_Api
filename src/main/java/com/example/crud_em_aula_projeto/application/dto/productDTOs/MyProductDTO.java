@@ -3,8 +3,10 @@ package com.example.crud_em_aula_projeto.application.dto.productDTOs;
 import com.example.crud_em_aula_projeto.domain.model.entity.Product;
 import com.example.crud_em_aula_projeto.domain.model.enuns.ProductStatus;
 
+import java.util.UUID;
+
 public record MyProductDTO(
-        Long id,
+        UUID id,
         String title,
         Double price,
         Integer quantity,

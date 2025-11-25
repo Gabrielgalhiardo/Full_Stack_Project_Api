@@ -12,13 +12,13 @@ import com.example.crud_em_aula_projeto.domain.model.enuns.ProductStatus;
 import com.example.crud_em_aula_projeto.domain.repository.CollaboratorRepository;
 import com.example.crud_em_aula_projeto.domain.repository.ProductRepository;
 import com.example.crud_em_aula_projeto.domain.service.ProductDomainService; // Importando o novo Domain Service
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +66,8 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<MyProductDTO> findProductsByAuthenticatedCollaborator() {
         Collaborator collaborator = getAuthenticatedCollaborator();
-        return productRepository.findAllByCollaboratorId(collaborator.getId())
+        List<ProductStatus> activeStatuses = List.of(ProductStatus.AVAILABLE, ProductStatus.OUT_OF_STOCK);
+        return productRepository.findAllByCollaboratorIdAndProductStatusIn(collaborator.getId(), activeStatuses)
                 .stream()
                 .map(MyProductDTO::new)
                 .collect(Collectors.toList());
@@ -90,7 +91,7 @@ public class ProductService {
     }
 
     @Transactional
-    public MyProductDTO updateMyProduct(Long productId, ProductRequestDTO requestDTO) {
+    public MyProductDTO updateMyProduct(UUID productId, ProductRequestDTO requestDTO) {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
@@ -109,7 +110,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(Long productId) {
+    public void deleteProduct(UUID productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 

@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")
@@ -29,7 +30,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // --- ENDPOINTS PÚBLICOS ---
 
     @GetMapping
     @Operation(
@@ -130,7 +130,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "404", description = "Produto não encontrado.")
             }
     )
-    public ResponseEntity<MyProductDTO> updateMyProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO requestDTO) {
+    public ResponseEntity<MyProductDTO> updateMyProduct(@PathVariable UUID id, @RequestBody @Valid ProductRequestDTO requestDTO) {
         MyProductDTO updatedProduct = productService.updateMyProduct(id, requestDTO);
         return ResponseEntity.ok(updatedProduct);
     }
@@ -163,7 +163,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "404", description = "Produto não encontrado.")
             }
     )
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

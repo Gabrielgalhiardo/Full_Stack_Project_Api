@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/collaborators")
@@ -58,7 +59,7 @@ public class CollaboratorController {
                     @ApiResponse(responseCode = "403", description = "Acesso negado."),
                     @ApiResponse(responseCode = "404", description = "Colaborador não encontrado.")
             })
-    public ResponseEntity<CollaboratorResponseDTO> getCollaboratorById(@PathVariable Long id) {
+    public ResponseEntity<CollaboratorResponseDTO> getCollaboratorById(@PathVariable UUID id) {
         return ResponseEntity.ok(collaboratorService.findById(id));
     }
 
@@ -86,7 +87,7 @@ public class CollaboratorController {
                     @ApiResponse(responseCode = "403", description = "Acesso negado."),
                     @ApiResponse(responseCode = "404", description = "Colaborador não encontrado.")
             })
-    public ResponseEntity<CollaboratorResponseDTO> updateCollaborator(@PathVariable Long id, @RequestBody @Valid CollaboratorRequestDTO requestDTO) {
+    public ResponseEntity<CollaboratorResponseDTO> updateCollaborator(@PathVariable UUID id, @RequestBody @Valid CollaboratorRequestDTO requestDTO) {
         return ResponseEntity.ok(collaboratorService.update(id, requestDTO));
     }
 
@@ -98,7 +99,7 @@ public class CollaboratorController {
                     @ApiResponse(responseCode = "403", description = "Acesso negado."),
                     @ApiResponse(responseCode = "404", description = "Colaborador não encontrado.")
             })
-    public ResponseEntity<Void> deleteCollaborator(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCollaborator(@PathVariable UUID id) {
         collaboratorService.deleteCollaborator(id);
         return ResponseEntity.noContent().build();
     }
@@ -111,7 +112,7 @@ public class CollaboratorController {
                     @ApiResponse(responseCode = "403", description = "Acesso negado."),
                     @ApiResponse(responseCode = "404", description = "Colaborador não encontrado.")
             })
-    public ResponseEntity<Void> activateCollaborator(@PathVariable Long id) {
+    public ResponseEntity<Void> activateCollaborator(@PathVariable UUID id) {
         collaboratorService.activate(id);
         return ResponseEntity.noContent().build();
     }

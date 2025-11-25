@@ -14,6 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity // Habilita anotações como @PreAuthorize
@@ -26,6 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 1. ROTAS PÚBLICAS (AQUI ESTÁ A CORREÇÃO MAIS IMPORTANTE)
@@ -33,11 +39,14 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/swagger-ui.html",      // A página HTML principal do Swagger
                                 "/swagger-ui/**",        // Os recursos (CSS, JS, etc.) do Swagger
-                                "/v3/api-docs/**"        // A especificação da API em JSON que o Swagger lê
+                                "/v3/api-docs/**"       // A especificação da API em JSON que o Swagger lê
                         ).permitAll()
+                        // Rotas públicas de produtos (GET)
+                        .requestMatchers(HttpMethod.GET, "/api/products").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/category/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
 
                         // 2. ROTAS DE CLIENTE (USER)
-                        .requestMatchers("/api/cart/**").hasRole("USER")
+                        .requestMatchers("/api/cart/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
 
                         // 3. ROTAS DE ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/products/inactive").hasRole("ADMIN")
@@ -55,6 +64,26 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
