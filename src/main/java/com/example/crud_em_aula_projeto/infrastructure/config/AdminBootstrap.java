@@ -6,11 +6,13 @@ import com.example.crud_em_aula_projeto.domain.repository.CollaboratorRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "sistema.admin.enabled", havingValue = "true", matchIfMissing = true)
 public class AdminBootstrap implements CommandLineRunner {
 
     // 1. Injetar o repositório correto

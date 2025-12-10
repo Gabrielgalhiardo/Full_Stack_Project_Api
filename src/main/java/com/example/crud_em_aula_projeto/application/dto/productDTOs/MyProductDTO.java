@@ -8,6 +8,7 @@ import java.util.UUID;
 public record MyProductDTO(
         UUID id,
         String title,
+        String description,
         Double price,
         Integer quantity,
         ProductStatus productStatus,
@@ -17,6 +18,7 @@ public record MyProductDTO(
         this(
                 product.getId(),
                 product.getTitle(),
+                product.getDescription(),
                 product.getPrice(),
                 product.getQuantity(),
                 product.getProductStatus(),
