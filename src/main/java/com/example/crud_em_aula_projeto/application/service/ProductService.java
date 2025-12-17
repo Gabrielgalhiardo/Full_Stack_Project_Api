@@ -48,17 +48,7 @@ public class ProductService {
 
         productDomainService.validateProductLimit(collaborator);
 
-        Product newProduct = Product.builder()
-                .title(requestDTO.title())
-                .description(requestDTO.description())
-                .price(requestDTO.price())
-                .quantity(requestDTO.quantity())
-                .imageUrl(requestDTO.imageUrl())
-                .productStatus(requestDTO.productStatus())
-                .productCategory(requestDTO.productCategory())
-                .collaborator(collaborator)
-                .build();
-
+        Product newProduct = requestDTO.toEntity(collaborator);
         Product savedProduct = productRepository.save(newProduct);
         return new MyProductDTO(savedProduct);
     }

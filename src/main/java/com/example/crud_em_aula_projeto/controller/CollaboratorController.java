@@ -122,6 +122,67 @@ public class CollaboratorController {
         return ResponseEntity.ok(collaboratorService.findAllActive());
     }
 
+    @GetMapping("/all")
+    @Operation(
+            summary = "[ADMIN] Listar todos os colaboradores (ordenados)",
+            description = """
+                    Retorna uma lista de todos os colaboradores, ordenados por status.
+                    
+                    **Ordem de exibição:**
+                    - Primeiro aparecem os colaboradores ativos (`active = true`)
+                    - Depois aparecem os colaboradores desativados (`active = false`)
+                    - Dentro de cada grupo, ordenados alfabeticamente por nome
+                    
+                    **Acesso restrito:**
+                    - Apenas usuários com role ADMIN podem acessar
+                    - Requer autenticação JWT
+                    """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Lista de todos os colaboradores ordenados retornada com sucesso.",
+                            content = @Content(
+                                    schema = @Schema(implementation = CollaboratorResponseDTO.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado.", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Acesso negado. Apenas administradores podem acessar.", content = @Content)
+            }
+    )
+    public ResponseEntity<List<CollaboratorResponseDTO>> getAllCollaboratorsOrdered() {
+        return ResponseEntity.ok(collaboratorService.findAllOrderedByActive());
+    }
+
+    @GetMapping("/inactive")
+    @Operation(
+            summary = "[ADMIN] Listar colaboradores desativados",
+            description = """
+                    Retorna uma lista apenas dos colaboradores que estão desativados.
+                    
+                    **Filtros aplicados:**
+                    - Apenas colaboradores com `active = false` são retornados
+                    - Se não houver colaboradores desativados, retorna uma lista vazia
+                    
+                    **Acesso restrito:**
+                    - Apenas usuários com role ADMIN podem acessar
+                    - Requer autenticação JWT
+                    """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Lista de colaboradores desativados retornada com sucesso (pode estar vazia).",
+                            content = @Content(
+                                    schema = @Schema(implementation = CollaboratorResponseDTO.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado.", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Acesso negado. Apenas administradores podem acessar.", content = @Content)
+            }
+    )
+    public ResponseEntity<List<CollaboratorResponseDTO>> getAllInactiveCollaborators() {
+        return ResponseEntity.ok(collaboratorService.findAllInactive());
+    }
+
     @GetMapping("/{id}")
     @Operation(
             summary = "[ADMIN] Buscar colaborador por ID",
@@ -266,7 +327,7 @@ public class CollaboratorController {
         return ResponseEntity.ok(collaboratorService.update(id, requestDTO));
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}/deactivate")
     @Operation(
             summary = "[ADMIN] Desativar um colaborador (Soft Delete)",
             description = """
@@ -277,6 +338,7 @@ public class CollaboratorController {
                     - O status do colaborador é alterado para 'inativo' (active = false)
                     - Colaboradores inativos não podem fazer login no sistema
                     - Produtos criados pelo colaborador permanecem no sistema
+                    - O e-mail permanece reservado e não pode ser usado em novos cadastros
                     
                     **Acesso restrito:**
                     - Apenas usuários com role ADMIN podem desativar colaboradores
@@ -294,6 +356,47 @@ public class CollaboratorController {
                     @ApiResponse(responseCode = "204", description = "Colaborador desativado com sucesso (sem conteúdo no corpo da resposta)."),
                     @ApiResponse(responseCode = "401", description = "Não autenticado.", content = @Content),
                     @ApiResponse(responseCode = "403", description = "Acesso negado. Apenas administradores podem desativar colaboradores.", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Colaborador não encontrado com o ID fornecido.", content = @Content)
+            }
+    )
+    public ResponseEntity<Void> deactivateCollaborator(@PathVariable UUID id) {
+        collaboratorService.deactivateCollaborator(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "[ADMIN] Deletar um colaborador (Hard Delete)",
+            description = """
+                    Remove fisicamente um colaborador do banco de dados.
+                    
+                    **⚠️ ATENÇÃO:**
+                    - Esta operação é **IRREVERSÍVEL**
+                    - O colaborador será **permanentemente removido** do banco de dados
+                    - Todos os dados associados ao colaborador serão perdidos
+                    - O e-mail ficará disponível para uso em novos cadastros
+                    - Produtos criados pelo colaborador permanecem no sistema
+                    
+                    **Diferente do Soft Delete:**
+                    - Soft Delete (desativar): apenas marca como inativo, dados preservados
+                    - Hard Delete (deletar): remove completamente do banco
+                    
+                    **Acesso restrito:**
+                    - Apenas usuários com role ADMIN podem deletar colaboradores
+                    - Requer autenticação JWT
+                    """,
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "UUID do colaborador a ser deletado",
+                            required = true,
+                            example = "660e8400-e29b-41d4-a716-446655440001"
+                    )
+            },
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Colaborador deletado permanentemente com sucesso."),
+                    @ApiResponse(responseCode = "401", description = "Não autenticado.", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Acesso negado. Apenas administradores podem deletar colaboradores.", content = @Content),
                     @ApiResponse(responseCode = "404", description = "Colaborador não encontrado com o ID fornecido.", content = @Content)
             }
     )

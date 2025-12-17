@@ -19,6 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "products")
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     protected UUID id;
@@ -49,9 +50,5 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "collaborator_id", nullable = false)
     private Collaborator collaborator;
-
-    @ManyToOne
-    @JoinColumn(name = "shopping_cart_id")
-    private ShoopingCart shoppingCart;
 
 }

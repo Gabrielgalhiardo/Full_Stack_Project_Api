@@ -41,12 +41,25 @@ public class SecurityConfig {
                                 "/swagger-ui/**",        // Os recursos (CSS, JS, etc.) do Swagger
                                 "/v3/api-docs/**"       // A especificação da API em JSON que o Swagger lê
                         ).permitAll()
+                        // Cadastro de cliente público
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
                         // Rotas públicas de produtos (GET)
                         .requestMatchers(HttpMethod.GET, "/api/products").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/products/category/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
 
                         // 2. ROTAS DE CLIENTE (USER)
                         .requestMatchers("/api/cart/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
+                        // Rotas de carrinho de compras (USER)
+                        .requestMatchers("/api/shopping-items/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN")
+                        // Rotas de shopping - ordem importa: específicas primeiro
+                        .requestMatchers(HttpMethod.GET, "/api/shopping").hasRole("ADMIN") // Listar todos (apenas ADMIN)
+                        .requestMatchers("/api/shopping/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN") // Outras rotas de shopping
+                        // Rotas de pedidos - ordem importa: específicas primeiro
+                        .requestMatchers(HttpMethod.GET, "/api/orders").hasRole("ADMIN") // Listar todos (apenas ADMIN)
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/**/status").hasRole("ADMIN") // Atualizar status (apenas ADMIN)
+                        .requestMatchers("/api/orders/my-sales").hasAnyRole("COLLABORATOR", "ADMIN") // Ver minhas vendas (COLLABORATOR)
+                        .requestMatchers("/api/orders/sales/**").hasAnyRole("COLLABORATOR", "ADMIN") // Ver venda específica (COLLABORATOR)
+                        .requestMatchers("/api/orders/**").hasAnyRole("USER", "COLLABORATOR", "ADMIN") // Outras rotas de pedidos
 
                         // 3. ROTAS DE ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/products/inactive").hasRole("ADMIN")
